@@ -26,7 +26,7 @@ export default class OverlappingHierarchy<Node> {
     this.#childrenMap.set(node, this.#childrenMap.get(node) || new Set());
   }
 
-  attach(node: Node, parent: Node | undefined = undefined): OverlappingHierarchyError | void {
+  add(node: Node, parent: Node | undefined = undefined): OverlappingHierarchyError | void {
     if (node === parent) return new LoopError("Cannot attach node to itself");
     if (
       this.nodes().has(node) &&
@@ -102,7 +102,7 @@ export default class OverlappingHierarchy<Node> {
 
   // todo: delete without second argument?
   // todo: when detach from undefined parent (default) - delete node, consider new api to replace delete
-  detach = (node: Node, parent: Node): void => // TODO consider changing argument order to be consistent with attach
+  remove = (node: Node, parent: Node): void => // TODO consider changing argument order to be consistent with attach
     this.#childrenMap.get(parent)?.delete(node) as unknown as void;
 
   delete(node: Node): void {
@@ -110,6 +110,6 @@ export default class OverlappingHierarchy<Node> {
     // const parents = this.parents(node);
     // parents?.forEach((parent) => this.detach(node, parent));
     this.#childrenMap.delete(node);
-    this.nodes().forEach((parent) => this.detach(node, parent));
+    this.nodes().forEach((parent) => this.remove(node, parent));
   }
 }

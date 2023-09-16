@@ -13,9 +13,9 @@ describe("OverlappingHierarchy", () => {
 
   beforeEach(() => {
     family = new OverlappingHierarchy();
-    family.attach(GRANDPARENT);
-    family.attach(PARENT, GRANDPARENT);
-    family.attach(CHILD, PARENT);
+    family.add(GRANDPARENT);
+    family.add(PARENT, GRANDPARENT);
+    family.add(CHILD, PARENT);
   });
 
   describe("new OverlappingHierarchy(source)", () => {
@@ -40,8 +40,8 @@ describe("OverlappingHierarchy", () => {
       for (const node of clone.nodes()) {
         clone.delete(node);
       }
-      clone.attach("New Child");
-      clone.attach( "New Parent", "New Child",);
+      clone.add("New Child");
+      clone.add( "New Parent", "New Child",);
       expect(originalNodes).toStrictEqual(family.nodes());
     });
   });
@@ -74,44 +74,44 @@ describe("OverlappingHierarchy", () => {
     describe("hierarch", () => {
       // todo: make parent second optional argument
       test("Adds string node", () => {
-        family.attach("relative");
+        family.add("relative");
         expect(family.nodes().has("relative")).toStrictEqual(true);
       });
 
       test("Adds null node", () => {
         const hierarchy = new OverlappingHierarchy<null>();
-        hierarchy.attach( null);
+        hierarchy.add( null);
         expect(hierarchy.nodes()).toStrictEqual(new Set([null]));
       });
 
       test("Adds object node", () => {
         const hierarchy = new OverlappingHierarchy<object>();
-        hierarchy.attach( {});
+        hierarchy.add( {});
         expect(hierarchy.nodes()).toStrictEqual(new Set([{}]));
       });
 
       test("Adding existing node does not change hierarchy", () => {
         const originalNodes = family.nodes();
-        family.attach(CHILD);
+        family.add(CHILD);
         expect(originalNodes).toStrictEqual(family.nodes());
       });
     });
 
     describe("child", () => {
       test("Attaching node to itself returns LoopError", () => {
-        expect(family.attach(CHILD, CHILD)).toStrictEqual(
+        expect(family.add(CHILD, CHILD)).toStrictEqual(
           new LoopError("Cannot attach node to itself")
         );
       });
 
       test("Attaching ancestor as a child returns CycleError", () => {
-        expect(family.attach( GRANDPARENT, CHILD,)).toStrictEqual(
+        expect(family.add( GRANDPARENT, CHILD,)).toStrictEqual(
           new CycleError("Cannot attach ancestor as a child")
         );
       });
 
       test("Attaching non-child descendant as a child returns TransitiveReductionError", () => {
-        expect(family.attach(CHILD, GRANDPARENT)).toStrictEqual(
+        expect(family.add(CHILD, GRANDPARENT)).toStrictEqual(
           new TransitiveReductionError(
             `Cannot attach non-child descendant as a child`
           )
@@ -119,10 +119,10 @@ describe("OverlappingHierarchy", () => {
       });
 
       test("Attaching bottom of the diamond to the top returns TransitiveReductionError", () => {
-        family.attach( "p2");
-        family.attach("p2", GRANDPARENT);
-        family.attach(CHILD, "p2");
-        expect(family.attach(CHILD, GRANDPARENT)).toStrictEqual(
+        family.add( "p2");
+        family.add("p2", GRANDPARENT);
+        family.add(CHILD, "p2");
+        expect(family.add(CHILD, GRANDPARENT)).toStrictEqual(
           new TransitiveReductionError(
             `Cannot attach non-child descendant as a child`
           )
@@ -130,9 +130,9 @@ describe("OverlappingHierarchy", () => {
       });
 
       test("Attaching another ancestor of a child returns TransitiveReductionError", () => {
-        family.attach( "p2");
-        family.attach(CHILD,"p2");
-        expect(family.attach("p2", PARENT)).toStrictEqual(
+        family.add( "p2");
+        family.add(CHILD,"p2");
+        expect(family.add("p2", PARENT)).toStrictEqual(
           new TransitiveReductionError(
             `Cannot attach child whose descendant is a child of the parent`
           )
@@ -140,23 +140,23 @@ describe("OverlappingHierarchy", () => {
       });
 
       test("Attaches node to the parent as a child", () => {
-        family.attach("grandchild", CHILD);
+        family.add("grandchild", CHILD);
         expect(family.children(CHILD)).toStrictEqual(new Set(["grandchild"]));
       });
 
       test("Attaching the same child again does not return error", () => {
-        family.attach("grandchild", CHILD);
-        expect(family.attach("grandchild",CHILD)).toBeUndefined();
+        family.add("grandchild", CHILD);
+        expect(family.add("grandchild",CHILD)).toBeUndefined();
       });
 
       test("Attaching node to a non-existing parent also adds parent", () => {
-        family.attach(CHILD, "missing");
+        family.add(CHILD, "missing");
         expect(family.nodes()?.has("missing")).toStrictEqual(true);
       });
 
       test("Attaches node to another parent as a child", () => {
-        family.attach("another parent",GRANDPARENT);
-        family.attach(CHILD,"another parent");
+        family.add("another parent",GRANDPARENT);
+        family.add(CHILD,"another parent");
         expect(family.children("another parent")?.has(CHILD)).toStrictEqual(
           true
         );
@@ -164,8 +164,8 @@ describe("OverlappingHierarchy", () => {
 
       test("Attached child has a parent", () => {
         const GREAT_GRANDPARENT = "great-grandparent";
-        family.attach( GREAT_GRANDPARENT);
-        family.attach(GRANDPARENT,GREAT_GRANDPARENT);
+        family.add( GREAT_GRANDPARENT);
+        family.add(GRANDPARENT,GREAT_GRANDPARENT);
         expect(family.parents(GRANDPARENT)).toStrictEqual(
           new Set([GREAT_GRANDPARENT])
         );
@@ -221,19 +221,19 @@ describe("OverlappingHierarchy", () => {
 
   describe(".detach()", () => {
     test("Parent no longer has detached child", () => {
-      family.detach(CHILD, PARENT);
+      family.remove(CHILD, PARENT);
       expect(family.children(PARENT)?.has(CHILD)).toStrictEqual(false);
     });
 
     test("Detached child still belongs to another parent", () => {
-      family.attach( "parent2");
-      family.attach(CHILD, "parent2");
-      family.detach(CHILD, PARENT);
+      family.add( "parent2");
+      family.add(CHILD, "parent2");
+      family.remove(CHILD, PARENT);
       expect(family.children("parent2")?.has(CHILD)).toStrictEqual(true);
     });
 
     test("Child detached from the only parent still belongs to the hierarchy", () => {
-      family.detach(CHILD, PARENT);
+      family.remove(CHILD, PARENT);
       expect(family.nodes().has(CHILD)).toStrictEqual(true);
     });
   });
@@ -256,7 +256,7 @@ describe("OverlappingHierarchy", () => {
 
     test("Removing the only node of the hierarchy empties the hierarchy", () => {
       const hierarchy = new OverlappingHierarchy<string>();
-      hierarchy.attach( "orphan");
+      hierarchy.add( "orphan");
       hierarchy.delete("orphan");
       expect(hierarchy.nodes()).toStrictEqual(new Set());
     });
