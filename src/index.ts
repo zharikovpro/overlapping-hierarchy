@@ -12,6 +12,10 @@ export class TransitiveReductionError extends OverlappingHierarchyError {} // ht
 export default class OverlappingHierarchy<Node> {
   #childrenMap: Map<Node | undefined, Set<Node>> = new Map();
 
+  #upsert(node: Node | undefined): void {
+    !this.#childrenMap.has(node) && this.#childrenMap.set(node, new Set());
+  }
+
   #intersection(a: Set<Node>, b: Set<Node>): Set<Node> {
     return new Set([...a].filter((x) => b.has(x)));
   }
@@ -20,10 +24,6 @@ export default class OverlappingHierarchy<Node> {
     source?.nodes().forEach((node) => {
       this.#childrenMap.set(node, source?.descendants(node, 1) || new Set());
     });
-  }
-
-  #upsert(node: Node | undefined): void {
-    !this.#childrenMap.has(node) && this.#childrenMap.set(node, new Set());
   }
 
   add(
