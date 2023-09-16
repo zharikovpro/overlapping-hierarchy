@@ -26,9 +26,8 @@ export default class OverlappingHierarchy<Node> {
     );
   }
 
-  #intersection(a: Set<Node>, b: Set<Node>): Set<Node> {
-    return new Set([...a].filter((x) => b.has(x)));
-  }
+  #intersection = (a: Set<Node>, b: Set<Node>): Set<Node> =>
+    new Set([...a].filter((x) => b.has(x)));
 
   constructor(source?: OverlappingHierarchy<Node>) {
     source?.nodes().forEach((node) => {
@@ -73,32 +72,21 @@ export default class OverlappingHierarchy<Node> {
       ) as Node[]
     );
 
-  #recursiveTraverse = (set: Set<Node>, traverseFunction: any, depth: typeof Infinity | 1 = Infinity): Set<Node> => {
-    if (depth === 1) {
-      return set;
-    }
+  #traverse = (set: Set<Node> | undefined, traverseFunction: any, depth: typeof Infinity | 1 = Infinity): Set<Node> | undefined => {
+    if (set === undefined || depth === 1)
+      return set
+
     const traversedNodes = Array.from(set).flatMap((child) =>
         Array.from(traverseFunction(child) || [])
     );
     return new Set([...set, ...traversedNodes]) as Set<Node>;
   }
 
-  descendants(
-    node: Node | undefined = undefined,
-    depth: typeof Infinity | 1 = Infinity
-  ): Set<Node> | undefined {
-    if (!this.#childrenMap.has(node)) return undefined;
+  descendants = (node: Node | undefined = undefined, depth: typeof Infinity | 1 = Infinity): Set<Node> | undefined =>
+    this.#traverse(this.#childrenMap.get(node), (n: Node) => this.descendants(n), depth)
 
-    const set = new Set(this.#childrenMap.get(node));
-    return this.#recursiveTraverse(set, this.descendants.bind(this), depth);
-  }
-
-  ancestors(node: Node, depth: typeof Infinity | 1 = Infinity): Set<Node> | undefined {
-    if (!this.#childrenMap.has(node)) return undefined;
-
-    const set = new Set(this.#parents(node))
-    return this.#recursiveTraverse(set, this.ancestors.bind(this), depth);
-  }
+  ancestors = (node: Node, depth: typeof Infinity | 1 = Infinity): Set<Node> | undefined =>
+    this.#traverse(this.#parents(node), (n: Node) => this.ancestors(n), depth)
 
   // todo: delete without second argument?
   // todo: when detach from undefined parent (default) - delete node, consider new api to replace delete
