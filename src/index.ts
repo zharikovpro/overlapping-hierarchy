@@ -16,6 +16,16 @@ export default class OverlappingHierarchy<Node> {
     !this.#childrenMap.has(node) && this.#childrenMap.set(node, new Set());
   }
 
+  #parents(child: Node): Set<Node> | undefined {
+    if (!this.#childrenMap.get(child)) return undefined;
+
+    return new Set(
+        Array.from(this.nodes()).filter((node) =>
+            this.#childrenMap.get(node)?.has(child)
+        )
+    );
+  }
+
   #intersection(a: Set<Node>, b: Set<Node>): Set<Node> {
     return new Set([...a].filter((x) => b.has(x)));
   }
@@ -80,27 +90,18 @@ export default class OverlappingHierarchy<Node> {
     return new Set([...children, ...childrenDescendants]);
   }
 
-  ancestors(node: Node): Set<Node> | undefined {
-    // todo: support undefined node
+  ancestors(node: Node, depth: typeof Infinity | 1 = Infinity): Set<Node> | undefined {
     if (!this.#childrenMap.get(node)) return undefined;
 
-    const parents = new Set(this.parents(node));
+    const parents = new Set(this.#parents(node));
+    if (depth === 1) {
+      return parents;
+    }
     const parentsAncestors = Array.from(parents).flatMap((parent) =>
       Array.from(this.ancestors(parent) || [])
     );
 
     return new Set([...parents, ...parentsAncestors]);
-  }
-
-  parents(child: Node): Set<Node> | undefined {
-    // ancestors with depth 1?
-    if (!this.#childrenMap.get(child)) return undefined;
-
-    return new Set(
-      Array.from(this.nodes()).filter((node) =>
-        this.#childrenMap.get(node)?.has(child)
-      )
-    );
   }
 
   // todo: delete without second argument?

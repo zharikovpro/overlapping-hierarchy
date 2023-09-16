@@ -16,14 +16,14 @@ D  E I  J
 
 ```typescript
 const hierarchy = new OverlappingHierarchy()
-hierarchy.add(undefined, 'A')
-hierarchy.add(undefined, 'B')
+hierarchy.add('A')
+hierarchy.add('B')
 hierarchy.add('A', 'C')
 hierarchy.add('B', 'C')
 hierarchy.add('C', 'D')
 hierarchy.add('C', 'E')
-hierarchy.add(undefined, 'F')
-hierarchy.add(undefined, 'G')
+hierarchy.add('F')
+hierarchy.add('G')
 hierarchy.add('F', 'H')
 hierarchy.add('G', 'H')
 hierarchy.add('H', 'I')
@@ -32,45 +32,51 @@ hierarchy.add('H', 'J')
 
 ## API
 
-### Initialization
+### Initialize
 
 `const empty = new OverlappingHierarchy()`
 
 `const clone = new OverlappingHierarchy(source)`
 
-### Mutation
+### Mutate
 
-`hierarchy.add(node, parent)`
+`hierarchy.add(node) // hierarch`
+
+`hierarchy.add(node, parent) // child`
 
 `hierarchy.remove(node, parent)`
 
 `hierarchy.delete(node)`
 
-### Traversal
+### Traverse
 
-`hierarchy.nodes()`
+`hierarchy.descendants() // all nodes`
 
-`hierarchy.descendants(node)`
+`hierarchy.descendants(node) // descendants`
 
-`hierarchy.ancestors(node)`
+`hierarchy.descendants(node, 1) // children`
 
-`hierarchy.parents(node)`
+`hierarchy.descendants(undefined, 1) // hierarchs`
+
+`hierarchy.ancestors(node) // ancestors`
+
+`hierarchy.ancestors(node, 1) // parents`
 
 ### Errors
 
-### LoopError
+#### LoopError
 
 ```typescript
 hierarchy.add('A', 'A') // LoopError: Cannot add node to itself
 ```
 
-### CycleError
+#### CycleError
 
 ```typescript
 hierarchy.add('D', 'A') // CycleError: Cannot add ancestor as a child
 ```
 
-### TransitiveReductionError
+#### TransitiveReductionError
 
 ```typescript
 hierarchy.add('A', 'D') // TransitiveReductionError: Cannot attach non-child descendant as a child

@@ -31,7 +31,7 @@ describe("OverlappingHierarchy", () => {
 
     test("Has the same relationships", () => {
       for (const node of family.nodes()) {
-        expect(clone.parents(node)).toStrictEqual(family.parents(node));
+        expect(clone.ancestors(node)).toStrictEqual(family.ancestors(node));
       }
     });
 
@@ -144,7 +144,7 @@ describe("OverlappingHierarchy", () => {
         const GREAT_GRANDPARENT = "great-grandparent";
         family.add(GREAT_GRANDPARENT);
         family.add(GRANDPARENT, GREAT_GRANDPARENT);
-        expect(family.parents(GRANDPARENT)).toStrictEqual(
+        expect(family.ancestors(GRANDPARENT)).toStrictEqual(
           new Set([GREAT_GRANDPARENT])
         );
       });
@@ -200,28 +200,36 @@ describe("OverlappingHierarchy", () => {
   });
 
   describe(".ancestors()", () => {
-    test("Returns ancestors", () => {
-      expect(family.ancestors(CHILD)).toStrictEqual(
-        new Set([GRANDPARENT, PARENT])
-      );
+    test("Given hierarch, returns empty set", () => {
+      expect(family.ancestors(GRANDPARENT)).toStrictEqual(new Set());
     });
 
     test("Returns undefined for non-member", () => {
       expect(family.ancestors("missing")).toBeUndefined();
     });
+
+    test("Given node, returns node ancestors", () => {
+      expect(family.ancestors(CHILD)).toStrictEqual(
+        new Set([GRANDPARENT, PARENT])
+      );
+    });
+
+    test("When depth is 1, returns node parents", () => {
+      expect(family.ancestors(CHILD, 1)).toStrictEqual(new Set([PARENT]));
+    });
   });
 
   describe(".parents()", () => {
     test("Given top-level node, returns nothing", () => {
-      expect(family.parents(GRANDPARENT)).toStrictEqual(new Set());
+      expect(family.ancestors(GRANDPARENT)).toStrictEqual(new Set());
     });
 
     test("Given child, returns its parents", () => {
-      expect(family.parents(CHILD)).toStrictEqual(new Set([PARENT]));
+      expect(family.ancestors(CHILD, 1)).toStrictEqual(new Set([PARENT]));
     });
 
     test("Returns undefined for non-member", () => {
-      expect(family.parents("missing")).toBeUndefined();
+      expect(family.ancestors("missing")).toBeUndefined();
     });
   });
 
@@ -247,7 +255,7 @@ describe("OverlappingHierarchy", () => {
   describe(".delete()", function () {
     test("Detaches all children from the parent", () => {
       family.delete(PARENT);
-      expect(family.parents(CHILD)).toEqual(new Set([]));
+      expect(family.ancestors(CHILD)).toEqual(new Set([]));
     });
 
     test("Detaches child from all parents", () => {
