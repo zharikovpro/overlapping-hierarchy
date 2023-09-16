@@ -17,7 +17,7 @@ export default class OverlappingHierarchy<Node> {
   }
 
   #parents(child: Node): Set<Node> | undefined {
-    if (!this.#childrenMap.get(child)) return undefined;
+    if (!this.#childrenMap.has(child)) return undefined;
 
     return new Set(
       Array.from(this.nodes()).filter((node) =>
