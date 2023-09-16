@@ -78,8 +78,8 @@ export default class OverlappingHierarchy<Node> {
   ): Set<Node> | undefined => {
     if (set === undefined || depth === 1) return set;
 
-    const traversedNodes = Array.from(set).flatMap((child) =>
-      Array.from(traverseFunction(child) || [])
+    const traversedNodes = Array.from(set).flatMap((node) =>
+      Array.from(traverseFunction(node) || [])
     );
     return new Set([...set, ...traversedNodes]) as Set<Node>;
   };
