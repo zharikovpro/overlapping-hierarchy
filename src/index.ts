@@ -26,13 +26,12 @@ export default class OverlappingHierarchy<Node> {
     this.#childrenMap.set(node, this.#childrenMap.get(node) || new Set());
   }
 
-  add(node: Node, parent: Node | undefined = undefined): OverlappingHierarchyError | void {
+  add(
+    node: Node,
+    parent: Node | undefined = undefined
+  ): OverlappingHierarchyError | void {
     if (node === parent) return new LoopError("Cannot attach node to itself");
-    if (
-      this.nodes().has(node) &&
-      parent &&
-      this.descendants(node)?.has(parent)
-    )
+    if (this.nodes().has(node) && parent && this.descendants(node)?.has(parent))
       return new CycleError("Cannot attach ancestor as a child");
     if (
       parent &&
@@ -58,7 +57,9 @@ export default class OverlappingHierarchy<Node> {
     this.#add(node);
   }
 
-  #children = (parent: Node | undefined = undefined): Set<Node> | undefined => // todo return frozen object? descendants with depth 1?
+  #children = (
+    parent: Node | undefined = undefined
+  ): Set<Node> | undefined => // todo return frozen object? descendants with depth 1?
     this.#childrenMap.has(parent)
       ? new Set(this.#childrenMap.get(parent))
       : undefined;
@@ -70,12 +71,15 @@ export default class OverlappingHierarchy<Node> {
       ) as Node[]
     );
 
-  descendants(node: Node | undefined = undefined, depth: typeof Infinity | 1 = Infinity): Set<Node> | undefined {
+  descendants(
+    node: Node | undefined = undefined,
+    depth: typeof Infinity | 1 = Infinity
+  ): Set<Node> | undefined {
     if (!this.#children(node)) return undefined;
 
     const children = new Set(this.#children(node));
     if (depth === 1) {
-      return children
+      return children;
     }
     const childrenDescendants = Array.from(children).flatMap((child) =>
       Array.from(this.descendants(child) || [])
@@ -84,7 +88,8 @@ export default class OverlappingHierarchy<Node> {
     return new Set([...children, ...childrenDescendants]);
   }
 
-  ancestors(node: Node): Set<Node> | undefined { // todo: support undefined node
+  ancestors(node: Node): Set<Node> | undefined {
+    // todo: support undefined node
     if (!this.#children(node)) return undefined;
 
     const parents = new Set(this.parents(node));
@@ -95,18 +100,21 @@ export default class OverlappingHierarchy<Node> {
     return new Set([...parents, ...parentsAncestors]);
   }
 
-  parents(child: Node): Set<Node> | undefined { // ancestors with depth 1?
+  parents(child: Node): Set<Node> | undefined {
+    // ancestors with depth 1?
     if (!this.#children(child)) return undefined;
 
     return new Set(
-      Array.from(this.nodes()).filter((node) => this.#children(node)?.has(child))
+      Array.from(this.nodes()).filter((node) =>
+        this.#children(node)?.has(child)
+      )
     );
   }
 
   // todo: delete without second argument?
   // todo: when detach from undefined parent (default) - delete node, consider new api to replace delete
-  remove = (node: Node, parent: Node): void => // TODO consider changing argument order to be consistent with attach
-    this.#childrenMap.get(parent)?.delete(node) as unknown as void;
+  remove = (node: Node, parent: Node): void =>
+    this.#childrenMap.get(parent)?.delete(node) as unknown as void; // TODO consider changing argument order to be consistent with attach
 
   delete(node: Node): void {
     // todo: deprecate after (detach from undefined)?
