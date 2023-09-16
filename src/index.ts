@@ -10,7 +10,7 @@ export class CycleError extends OverlappingHierarchyError {}
 export class TransitiveReductionError extends OverlappingHierarchyError {} // https://en.wikipedia.org/wiki/Transitive_reduction#In_directed_acyclic_graphs
 
 export default class OverlappingHierarchy<Node> {
-  #childrenMap: Map<Node, Set<Node>> = new Map();
+  #childrenMap: Map<Node | undefined, Set<Node>> = new Map();
 
   #intersection(a: Set<Node>, b: Set<Node>): Set<Node> {
     return new Set([...a].filter((x) => b.has(x)));
@@ -22,15 +22,23 @@ export default class OverlappingHierarchy<Node> {
     });
   }
 
-  add(node: Node): void {
+  #add(node: Node | undefined): void {
     this.#childrenMap.set(node, this.#childrenMap.get(node) || new Set());
   }
 
-  attach(parent: Node, child: Node): OverlappingHierarchyError | void {
+  attach( // todo: options with parent and index
+    parent: Node | undefined,
+    child: Node
+  ): OverlappingHierarchyError | void {
     if (child === parent) return new LoopError("Cannot attach node to itself");
-    if (this.nodes().has(child) && this.descendants(child)?.has(parent))
+    if (
+      this.nodes().has(child) &&
+      parent &&
+      this.descendants(child)?.has(parent)
+    )
       return new CycleError("Cannot attach ancestor as a child");
     if (
+      parent &&
       !this.children(parent)?.has(child) &&
       this.descendants(parent)?.has(child)
     )
@@ -47,26 +55,23 @@ export default class OverlappingHierarchy<Node> {
         "Cannot attach child whose descendant is a child of the parent"
       );
 
-    if (this.#childrenMap.get(parent) === undefined) this.add(parent);
+    if (this.#childrenMap.get(parent) === undefined) this.#add(parent);
 
     this.#childrenMap.get(parent)?.add(child);
-    this.add(child);
+    this.#add(child);
   }
 
-  children = (parent: Node): Set<Node> | undefined =>
-    this.#childrenMap.get(parent)
+  children = (parent: Node | undefined = undefined): Set<Node> | undefined => // todo return frozen object?
+    this.#childrenMap.has(parent)
       ? new Set(this.#childrenMap.get(parent))
       : undefined;
 
-  nodes = (): Set<Node> => new Set(this.#childrenMap.keys());
-
-  hierarchs = (): Set<Node> => {
-    const nodes = this.nodes();
-    this.nodes().forEach((n) =>
-      this.children(n)?.forEach((c) => nodes.delete(c))
+  nodes = (): Set<Node> =>
+    new Set(
+      Array.from(this.#childrenMap.keys()).filter(
+        (n) => n !== undefined
+      ) as Node[]
     );
-    return nodes;
-  };
 
   descendants(ancestor: Node): Set<Node> | undefined {
     if (!this.children(ancestor)) return undefined;

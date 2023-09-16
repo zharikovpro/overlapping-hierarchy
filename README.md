@@ -16,14 +16,14 @@ D  E I  J
 
 ```typescript
 const hierarchy = new OverlappingHierarchy()
-hierarchy.add('A')
-hierarchy.add('B')
+hierarchy.attach(undefined, 'A')
+hierarchy.attach(undefined, 'B')
 hierarchy.attach('A', 'C')
 hierarchy.attach('B', 'C')
 hierarchy.attach('C', 'D')
 hierarchy.attach('C', 'E')
-hierarchy.add('F')
-hierarchy.add('G')
+hierarchy.attach(undefined, 'F')
+hierarchy.attach(undefined, 'G')
 hierarchy.attach('F', 'H')
 hierarchy.attach('G', 'H')
 hierarchy.attach('H', 'I')
@@ -36,11 +36,9 @@ hierarchy.attach('H', 'J')
 
 `const empty = new OverlappingHierarchy()`
 
-`const cloned = new OverlappingHierarchy(source)`
+`const clone = new OverlappingHierarchy(source)`
 
 ### Mutation
-
-`hierarchy.add(node)`
 
 `hierarchy.attach(parent, child)`
 
@@ -51,8 +49,6 @@ hierarchy.attach('H', 'J')
 ### Traversal
 
 `hierarchy.nodes()`
-
-`hierarchy.hierarchs()`
 
 `hierarchy.children(parent)`
 
