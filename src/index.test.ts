@@ -221,19 +221,19 @@ describe("OverlappingHierarchy", () => {
 
   describe(".detach()", () => {
     test("Parent no longer has detached child", () => {
-      family.detach(PARENT, CHILD);
+      family.detach(CHILD, PARENT);
       expect(family.children(PARENT)?.has(CHILD)).toStrictEqual(false);
     });
 
     test("Detached child still belongs to another parent", () => {
       family.attach( "parent2");
       family.attach(CHILD, "parent2");
-      family.detach(PARENT, CHILD);
+      family.detach(CHILD, PARENT);
       expect(family.children("parent2")?.has(CHILD)).toStrictEqual(true);
     });
 
     test("Child detached from the only parent still belongs to the hierarchy", () => {
-      family.detach(PARENT, CHILD);
+      family.detach(CHILD, PARENT);
       expect(family.nodes().has(CHILD)).toStrictEqual(true);
     });
   });
