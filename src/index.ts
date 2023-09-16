@@ -101,15 +101,12 @@ export default class OverlappingHierarchy<Node> {
   ): Set<Node> | undefined =>
     this.#traverse(this.#parents(node), (n: Node) => this.ancestors(n), depth);
 
-  // todo: delete without second argument?
-  // todo: when detach from undefined parent (default) - delete node, consider new api to replace delete
+  // todo: when remove from undefined parent (default) - delete node, consider new api to replace delete
   remove = (node: Node, parent: Node): void =>
-    this.#childrenMap.get(parent)?.delete(node) as unknown as void; // TODO consider changing argument order to be consistent with attach
+    this.#childrenMap.get(parent)?.delete(node) as unknown as void;
 
   delete(node: Node): void {
-    // todo: deprecate after (detach from undefined)?
-    // const parents = this.parents(node);
-    // parents?.forEach((parent) => this.detach(node, parent));
+    // todo: deprecate after (remove from undefined)?
     this.#childrenMap.delete(node);
     this.nodes().forEach((parent) => this.remove(node, parent));
   }
