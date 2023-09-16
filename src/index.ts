@@ -22,8 +22,8 @@ export default class OverlappingHierarchy<Node> {
     });
   }
 
-  #add(node: Node | undefined): void {
-    this.#childrenMap.set(node, this.#childrenMap.get(node) || new Set());
+  #upsert(node: Node | undefined): void {
+    !this.#childrenMap.has(node) && this.#childrenMap.set(node, new Set());
   }
 
   add(
@@ -51,10 +51,9 @@ export default class OverlappingHierarchy<Node> {
         "Cannot attach child whose descendant is a child of the parent"
       );
 
-    if (this.#childrenMap.get(parent) === undefined) this.#add(parent);
-
+    this.#upsert(parent);
+    this.#upsert(node);
     this.#childrenMap.get(parent)?.add(node);
-    this.#add(node);
   }
 
   #children = (
