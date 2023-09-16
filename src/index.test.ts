@@ -46,30 +46,6 @@ describe("OverlappingHierarchy", () => {
     });
   });
 
-  describe(".children()", () => {
-    test("Without argument, returns hierarchs", () => {
-      expect(family.children()).toStrictEqual(new Set([GRANDPARENT]));
-    });
-
-    test("When parent is undefined, returns hierarchs", () => {
-      expect(family.children(undefined)).toStrictEqual(new Set([GRANDPARENT]));
-    });
-
-    test("When parent does not exist, returns undefined", () => {
-      expect(family.children("missing")).toBeUndefined();
-    });
-
-    test("When parent exists, returns children", () => {
-      expect(family.children(PARENT)).toStrictEqual(new Set([CHILD]));
-    });
-
-    test("Mutating returned set does not affect hierarchy", () => {
-      const children = family.children(PARENT);
-      children?.clear();
-      expect(family.children(PARENT)?.has(CHILD)).toStrictEqual(true);
-    });
-  });
-
   describe(".attach()", () => {
     describe("hierarch", () => {
       // todo: make parent second optional argument
@@ -141,7 +117,7 @@ describe("OverlappingHierarchy", () => {
 
       test("Attaches node to the parent as a child", () => {
         family.add("grandchild", CHILD);
-        expect(family.children(CHILD)).toStrictEqual(new Set(["grandchild"]));
+        expect(family.descendants(CHILD)).toStrictEqual(new Set(["grandchild"]));
       });
 
       test("Attaching the same child again does not return error", () => {
@@ -157,7 +133,7 @@ describe("OverlappingHierarchy", () => {
       test("Attaches node to another parent as a child", () => {
         family.add("another parent",GRANDPARENT);
         family.add(CHILD,"another parent");
-        expect(family.children("another parent")?.has(CHILD)).toStrictEqual(
+        expect(family.descendants("another parent")?.has(CHILD)).toStrictEqual(
           true
         );
       });
@@ -182,14 +158,36 @@ describe("OverlappingHierarchy", () => {
   });
 
   describe(".descendants()", () => {
-    test("Returns descendants", () => {
+    test("Without arguments, returns all nodes", () => {
+      expect(family.descendants()).toStrictEqual(new Set([GRANDPARENT, PARENT, CHILD]));
+    });
+
+    test("When parent is undefined, returns all nodes", () => {
+      expect(family.descendants(undefined)).toStrictEqual(new Set([GRANDPARENT, PARENT, CHILD]));
+    });
+
+    test("When parent is undefined and depth is 1, returns hierarchs", () => {
+      expect(family.descendants(undefined, 1)).toStrictEqual(new Set([GRANDPARENT]));
+    });
+
+    test("When parent does not exist, returns undefined", () => {
+      expect(family.descendants("missing")).toBeUndefined();
+    });
+
+    test("When parent is defined, returns its descendants", () => {
       expect(family.descendants(GRANDPARENT)).toStrictEqual(
         new Set([PARENT, CHILD])
       );
     });
 
-    test("Returns undefined for non-member", () => {
-      expect(family.descendants("missing")).toBeUndefined();
+    test("When parent is defined and depth is 1, returns its children", () => {
+      expect(family.descendants(PARENT, 1)).toStrictEqual(new Set([CHILD]));
+    });
+
+    test("Mutating returned set does not affect hierarchy", () => {
+      const children = family.descendants(PARENT);
+      children?.clear();
+      expect(family.descendants(PARENT, 1)?.has(CHILD)).toStrictEqual(true);
     });
   });
 
@@ -222,14 +220,14 @@ describe("OverlappingHierarchy", () => {
   describe(".detach()", () => {
     test("Parent no longer has detached child", () => {
       family.remove(CHILD, PARENT);
-      expect(family.children(PARENT)?.has(CHILD)).toStrictEqual(false);
+      expect(family.descendants(PARENT, 1)?.has(CHILD)).toStrictEqual(false);
     });
 
     test("Detached child still belongs to another parent", () => {
       family.add( "parent2");
       family.add(CHILD, "parent2");
       family.remove(CHILD, PARENT);
-      expect(family.children("parent2")?.has(CHILD)).toStrictEqual(true);
+      expect(family.descendants("parent2", 1)?.has(CHILD)).toStrictEqual(true);
     });
 
     test("Child detached from the only parent still belongs to the hierarchy", () => {
@@ -246,7 +244,7 @@ describe("OverlappingHierarchy", () => {
 
     test("Detaches child from all parents", () => {
       family.delete(PARENT);
-      expect(family.children(GRANDPARENT)?.has(PARENT)).toStrictEqual(false);
+      expect(family.descendants(GRANDPARENT)?.has(PARENT)).toStrictEqual(false);
     });
 
     test("Hierarchy no longer has removed node", () => {

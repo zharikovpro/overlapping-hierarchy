@@ -54,8 +54,6 @@ hierarchy.add('H', 'J')
 
 `hierarchy.ancestors(node)`
 
-`hierarchy.children(node)`
-
 `hierarchy.parents(node)`
 
 ### Errors
