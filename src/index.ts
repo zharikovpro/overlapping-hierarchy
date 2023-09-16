@@ -73,35 +73,31 @@ export default class OverlappingHierarchy<Node> {
       ) as Node[]
     );
 
+  #recursiveTraverse = (set: Set<Node>, traverseFunction: any, depth: typeof Infinity | 1 = Infinity): Set<Node> => {
+    if (depth === 1) {
+      return set;
+    }
+    const traversedNodes = Array.from(set).flatMap((child) =>
+        Array.from(traverseFunction(child) || [])
+    );
+    return new Set([...set, ...traversedNodes]) as Set<Node>;
+  }
+
   descendants(
     node: Node | undefined = undefined,
     depth: typeof Infinity | 1 = Infinity
   ): Set<Node> | undefined {
     if (!this.#childrenMap.has(node)) return undefined;
 
-    const children = new Set(this.#childrenMap.get(node));
-    if (depth === 1) {
-      return children;
-    }
-    const childrenDescendants = Array.from(children).flatMap((child) =>
-      Array.from(this.descendants(child) || [])
-    );
-
-    return new Set([...children, ...childrenDescendants]);
+    const set = new Set(this.#childrenMap.get(node));
+    return this.#recursiveTraverse(set, this.descendants.bind(this), depth);
   }
 
   ancestors(node: Node, depth: typeof Infinity | 1 = Infinity): Set<Node> | undefined {
-    if (!this.#childrenMap.get(node)) return undefined;
+    if (!this.#childrenMap.has(node)) return undefined;
 
-    const parents = new Set(this.#parents(node));
-    if (depth === 1) {
-      return parents;
-    }
-    const parentsAncestors = Array.from(parents).flatMap((parent) =>
-      Array.from(this.ancestors(parent) || [])
-    );
-
-    return new Set([...parents, ...parentsAncestors]);
+    const set = new Set(this.#parents(node))
+    return this.#recursiveTraverse(set, this.ancestors.bind(this), depth);
   }
 
   // todo: delete without second argument?
