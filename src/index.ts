@@ -67,7 +67,7 @@ export default class OverlappingHierarchy<Node> {
     node: Node | undefined = undefined,
     depth: typeof Infinity | 1 = Infinity
   ): Set<Node> | undefined {
-    if (!this.#childrenMap.get(node)) return undefined;
+    if (!this.#childrenMap.has(node)) return undefined;
 
     const children = new Set(this.#childrenMap.get(node));
     if (depth === 1) {
