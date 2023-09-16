@@ -16,18 +16,18 @@ D  E I  J
 
 ```typescript
 const hierarchy = new OverlappingHierarchy()
-hierarchy.attach(undefined, 'A')
-hierarchy.attach(undefined, 'B')
-hierarchy.attach('A', 'C')
-hierarchy.attach('B', 'C')
-hierarchy.attach('C', 'D')
-hierarchy.attach('C', 'E')
-hierarchy.attach(undefined, 'F')
-hierarchy.attach(undefined, 'G')
-hierarchy.attach('F', 'H')
-hierarchy.attach('G', 'H')
-hierarchy.attach('H', 'I')
-hierarchy.attach('H', 'J')
+hierarchy.add(undefined, 'A')
+hierarchy.add(undefined, 'B')
+hierarchy.add('A', 'C')
+hierarchy.add('B', 'C')
+hierarchy.add('C', 'D')
+hierarchy.add('C', 'E')
+hierarchy.add(undefined, 'F')
+hierarchy.add(undefined, 'G')
+hierarchy.add('F', 'H')
+hierarchy.add('G', 'H')
+hierarchy.add('H', 'I')
+hierarchy.add('H', 'J')
 ```
 
 ## API
@@ -40,9 +40,9 @@ hierarchy.attach('H', 'J')
 
 ### Mutation
 
-`hierarchy.attach(parent, child)`
+`hierarchy.add(node, parent)`
 
-`hierarchy.detach(parent, child)`
+`hierarchy.remove(node, parent)`
 
 `hierarchy.delete(node)`
 
@@ -50,31 +50,31 @@ hierarchy.attach('H', 'J')
 
 `hierarchy.nodes()`
 
-`hierarchy.children(parent)`
+`hierarchy.descendants(node)`
 
-`hierarchy.parents(child)`
+`hierarchy.ancestors(node)`
 
-`hierarchy.descendants(ancestor)`
+`hierarchy.children(node)`
 
-`hierarchy.ancestors(descendant)`
+`hierarchy.parents(node)`
 
 ### Errors
 
 ### LoopError
 
 ```typescript
-hierarchy.attach('A', 'A') // LoopError: Cannot add node to itself
+hierarchy.add('A', 'A') // LoopError: Cannot add node to itself
 ```
 
 ### CycleError
 
 ```typescript
-hierarchy.attach('D', 'A') // CycleError: Cannot add ancestor as a child
+hierarchy.add('D', 'A') // CycleError: Cannot add ancestor as a child
 ```
 
 ### TransitiveReductionError
 
 ```typescript
-hierarchy.attach('A', 'D') // TransitiveReductionError: Cannot attach non-child descendant as a child
-hierarchy.attach('A', 'B') // TransitiveReductionError: Cannot attach child whose descendant is a child of the parent
+hierarchy.add('A', 'D') // TransitiveReductionError: Cannot attach non-child descendant as a child
+hierarchy.add('A', 'B') // TransitiveReductionError: Cannot attach child whose descendant is a child of the parent
 ```
