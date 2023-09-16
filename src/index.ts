@@ -65,12 +65,11 @@ export default class OverlappingHierarchy<Node> {
     this.#childrenMap.get(parent)?.add(node);
   }
 
-  nodes = (): Set<Node> => // TODO: almost the same as descendants(parent = undefined) but always defined
-    new Set(
-      Array.from(this.#childrenMap.keys()).filter(
-        (n) => n !== undefined
-      ) as Node[]
-    );
+  nodes = (): Set<Node> => {// TODO: almost the same as descendants(parent = undefined) but always defined
+    const set = new Set(this.#childrenMap.keys())
+    set.delete(undefined)
+    return set as Set<Node>
+  }
 
   #traverse = (
     set: Set<Node> | undefined,
