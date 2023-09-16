@@ -20,9 +20,9 @@ export default class OverlappingHierarchy<Node> {
     if (!this.#childrenMap.get(child)) return undefined;
 
     return new Set(
-        Array.from(this.nodes()).filter((node) =>
-            this.#childrenMap.get(node)?.has(child)
-        )
+      Array.from(this.nodes()).filter((node) =>
+        this.#childrenMap.get(node)?.has(child)
+      )
     );
   }
 
@@ -72,21 +72,34 @@ export default class OverlappingHierarchy<Node> {
       ) as Node[]
     );
 
-  #traverse = (set: Set<Node> | undefined, traverseFunction: any, depth: typeof Infinity | 1 = Infinity): Set<Node> | undefined => {
-    if (set === undefined || depth === 1)
-      return set
+  #traverse = (
+    set: Set<Node> | undefined,
+    traverseFunction: any,
+    depth: typeof Infinity | 1 = Infinity
+  ): Set<Node> | undefined => {
+    if (set === undefined || depth === 1) return set;
 
     const traversedNodes = Array.from(set).flatMap((child) =>
-        Array.from(traverseFunction(child) || [])
+      Array.from(traverseFunction(child) || [])
     );
     return new Set([...set, ...traversedNodes]) as Set<Node>;
-  }
+  };
 
-  descendants = (node: Node | undefined = undefined, depth: typeof Infinity | 1 = Infinity): Set<Node> | undefined =>
-    this.#traverse(this.#childrenMap.get(node), (n: Node) => this.descendants(n), depth)
+  descendants = (
+    node: Node | undefined = undefined,
+    depth: typeof Infinity | 1 = Infinity
+  ): Set<Node> | undefined =>
+    this.#traverse(
+      this.#childrenMap.get(node),
+      (n: Node) => this.descendants(n),
+      depth
+    );
 
-  ancestors = (node: Node, depth: typeof Infinity | 1 = Infinity): Set<Node> | undefined =>
-    this.#traverse(this.#parents(node), (n: Node) => this.ancestors(n), depth)
+  ancestors = (
+    node: Node,
+    depth: typeof Infinity | 1 = Infinity
+  ): Set<Node> | undefined =>
+    this.#traverse(this.#parents(node), (n: Node) => this.ancestors(n), depth);
 
   // todo: delete without second argument?
   // todo: when detach from undefined parent (default) - delete node, consider new api to replace delete
