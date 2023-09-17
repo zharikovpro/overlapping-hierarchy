@@ -127,9 +127,9 @@ describe("OverlappingHierarchy", () => {
         expect(family.add("grandchild", CHILD)).toBeUndefined();
       });
 
-      test("Attaching node to a non-existing parent also adds parent", () => {
+      test("Adding to a non-existing parent also adds parent", () => {
         family.add(CHILD, "missing");
-        expect(family.nodes()?.has("missing")).toStrictEqual(true);
+        expect(family.descendants(undefined, 1)?.has("missing")).toStrictEqual(true);
       });
 
       test("Attaches node to another parent as a child", () => {
