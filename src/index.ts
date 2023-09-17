@@ -76,6 +76,7 @@ export default class OverlappingHierarchy<Node> {
     traverseFunction: any,
     depth: typeof Infinity | 1 = Infinity
   ): Set<Node> | undefined => {
+    // todo return immutable value object https://martinfowler.com/bliki/ValueObject.html
     if (set === undefined || depth === 1) return set; // TODO: check and fix aliasing bug - can clear children of node
 
     const traversedNodes = Array.from(set).flatMap((node) =>
