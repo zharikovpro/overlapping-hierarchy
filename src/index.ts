@@ -60,6 +60,10 @@ export default class OverlappingHierarchy<Node> {
         "Cannot attach child whose descendant is a child of the parent"
       );
 
+    if (parent && !this.#childrenMap.has(parent)) {
+      this.add(parent);
+    }
+
     this.#upsert(parent);
     this.#upsert(node);
     this.#childrenMap.get(parent)?.add(node);
