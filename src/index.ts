@@ -30,7 +30,7 @@ export default class OverlappingHierarchy<Node> {
 
   attach(parent: Node, child: Node): OverlappingHierarchyError | void {
     if (child === parent) return new LoopError("Cannot attach node to itself");
-    if (this.nodes().has(child) && this.descendants(child)?.has(parent))
+    if (this.#childrenMap.has(child) && this.descendants(child)?.has(parent))
       return new CycleError("Cannot attach ancestor as a child");
     if (
       !this.children(parent)?.has(child) &&
@@ -49,10 +49,9 @@ export default class OverlappingHierarchy<Node> {
         "Cannot attach child whose descendant is a child of the parent"
       );
 
-    if (!this.#childrenMap.has(parent)) this.add(parent);
-
-    this.#childrenMap.get(parent)?.add(child);
+    this.add(parent);
     this.add(child);
+    this.#childrenMap.get(parent)?.add(child);
   }
 
   children = (parent: Node): Set<Node> | undefined =>
