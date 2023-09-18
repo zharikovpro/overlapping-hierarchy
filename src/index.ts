@@ -41,7 +41,7 @@ export default class OverlappingHierarchy<Node> {
       );
     if (
       this.#intersection(
-        new Set(this.descendants(child)),
+          new Set(this.descendants(child)),
         new Set(this.children(parent))
       ).size > 0
     )
@@ -49,9 +49,10 @@ export default class OverlappingHierarchy<Node> {
         "Cannot attach child whose descendant is a child of the parent"
       );
 
-    this.add(parent);
-    this.add(child);
+    if (!this.#childrenMap.has(parent)) this.add(parent);
+
     this.#childrenMap.get(parent)?.add(child);
+    this.add(child);
   }
 
   children = (parent: Node): Array<Node> | undefined =>
