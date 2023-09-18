@@ -20,7 +20,7 @@ export default class OverlappingHierarchy<Node> {
 
   constructor(source?: OverlappingHierarchy<Node>) {
     source?.nodes().forEach((node) => {
-      this.#childrenMap.set(node, new Set(source.children(node)) || new Set());
+      this.#childrenMap.set(node, source.children(node) || new Set());
     });
   }
 
@@ -33,7 +33,7 @@ export default class OverlappingHierarchy<Node> {
     if (this.nodes().has(child) && this.descendants(child)?.has(parent))
       return new CycleError("Cannot attach ancestor as a child");
     if (
-      !this.children(parent)?.includes(child) &&
+      !this.children(parent)?.has(child) &&
       this.descendants(parent)?.has(child)
     )
       return new TransitiveReductionError(
@@ -41,8 +41,8 @@ export default class OverlappingHierarchy<Node> {
       );
     if (
       this.#intersection(
-          new Set(this.descendants(child)),
-        new Set(this.children(parent))
+        this.descendants(child) || new Set(),
+        this.children(parent) || new Set()
       ).size > 0
     )
       return new TransitiveReductionError(
@@ -55,9 +55,9 @@ export default class OverlappingHierarchy<Node> {
     this.add(child);
   }
 
-  children = (parent: Node): Array<Node> | undefined =>
+  children = (parent: Node): Set<Node> | undefined =>
     this.#childrenMap.has(parent)
-      ? Array.from(this.#childrenMap.get(parent) as Set<Node>)
+      ? new Set(this.#childrenMap.get(parent))
       : undefined;
 
   nodes = (): Set<Node> => new Set(this.#childrenMap.keys());
@@ -88,7 +88,7 @@ export default class OverlappingHierarchy<Node> {
 
   parents = (child: Node): Set<Node> | undefined =>
     this.#childrenMap.has(child)
-      ? this.#filterNodes((n) => !!this.children(n)?.includes(child))
+      ? this.#filterNodes((n) => !!this.children(n)?.has(child))
       : undefined;
 
   detach = (parent: Node, child: Node): void =>
