@@ -1,4 +1,6 @@
-# Overlapping hierarchy
+# OH | Overlapping Hierarchy
+
+**⚠️ Superseded by [OOH | Ordered Overlapping Hierarcny](https://github.com/zharikovpro/ordered-overlapping-hierarchy) and no longer maintained.**
 
 Library for modeling [overlapping hierarchy](https://en.wikipedia.org/wiki/Hierarchy#Degree_of_branching), in which nodes can have multiple parents.
 
